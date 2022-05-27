@@ -1,11 +1,9 @@
 package com.example.composetry
 
 import android.app.NotificationManager
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
+import android.content.*
 import android.net.wifi.WifiManager
+import android.preference.PreferenceManager
 import android.util.Log
 import com.example.composetry.MyService.Companion.sendNotificationIP
 import com.example.composetry.MyService.Companion.startStateNotification
@@ -22,6 +20,10 @@ private const val TAG = "AdbReceiver"
 
 class AdbReceiver : BroadcastReceiver() {
     companion object {
+        const val IS_ADB_DIRTY_KEY = "is_adb_dirty"
+        const val ADB_PORT_KEY = "adb_port"
+        const val ADB_PORT_IP_KEY = "adb_port_ip"
+
         fun register(context: Context): AdbReceiver {
             val receiver = AdbReceiver()
             context.registerReceiver(
@@ -29,6 +31,10 @@ class AdbReceiver : BroadcastReceiver() {
                 IntentFilter(WIRELESS_DEBUG_STATE_CHANGED_ACTION)
             )
             return receiver
+        }
+
+        fun unregister(context: Context, receiver: AdbReceiver?) {
+            context.unregisterReceiver(receiver)
         }
     }
 
@@ -48,10 +54,12 @@ class AdbReceiver : BroadcastReceiver() {
         )
     }
 
+    private var mSharedPreferences: SharedPreferences? = null
 
     override fun onReceive(context: Context, intent: Intent) {
         notificationManager =
             context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
 
         when (intent.action) {
             WIRELESS_DEBUG_STATE_CHANGED_ACTION -> {
@@ -60,10 +68,17 @@ class AdbReceiver : BroadcastReceiver() {
                 when (status) {
                     WIRELESS_STATUS_CONNECTED -> {
                         Log.d(TAG, "Connected to port $port ,${getIPAddress(context)}")
+                        mSharedPreferences?.edit()?.apply {
+                            putString(ADB_PORT_IP_KEY, getIPAddress(context))
+                            putInt(ADB_PORT_KEY, port)
+                            putBoolean(IS_ADB_DIRTY_KEY, false)
+                            apply()
+                        }
                         context.sendNotificationIP("${getIPAddress(context)}:$port")
                     }
                     WIRELESS_STATUS_DISCONNECTED -> {
                         Log.d(TAG, "Disconnected from port $port")
+                        mSharedPreferences?.edit()?.putBoolean(IS_ADB_DIRTY_KEY, true)?.apply()
                         notificationManager.notify(NOTIFICATION_ID, context.startStateNotification())
                     }
                 }

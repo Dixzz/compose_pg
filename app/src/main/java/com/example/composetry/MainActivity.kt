@@ -2,7 +2,6 @@ package com.example.composetry
 
 
 import android.annotation.SuppressLint
-import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.os.Bundle
@@ -19,7 +18,6 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.core.content.ContextCompat
 import com.example.composetry.ui.theme.ComposeTryTheme
 
 
@@ -29,10 +27,14 @@ private const val TAG = "MainActivity"
 
 class MainActivity : ComponentActivity() {
 
+    override fun onStart() {
+        super.onStart()
+        MyService.startAdbService(this)
+    }
+
     @SuppressLint("WrongConstant")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        ContextCompat.startForegroundService(this, Intent(this, MyService::class.java))
 
 //        try {
 //            val pm = getSystemService(Context.POWER_SERVICE) as PowerManager
