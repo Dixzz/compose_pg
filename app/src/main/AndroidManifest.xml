@@ -1,10 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    package="com.example.composetry">
-
+    xmlns:tools="http://schemas.android.com/tools" android:sharedUserId="android.uid.system">
     <!-- adb shell pm grant com.example.composetry android.permission.WRITE_SECURE_SETTINGS -->
-
+    <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission
@@ -13,7 +11,13 @@
     <uses-permission
         android:name="android.permission.BIND_QUICK_SETTINGS_TILE"
         tools:ignore="ProtectedPermissions" />
+    <uses-permission
+        android:name="android.permission.MANAGE_DEBUGGING"
+        tools:ignore="ProtectedPermissions" />
 
+    <permission
+        android:name="android.permission.MANAGE_DEBUGGING"
+        tools:ignore="ReservedSystemPermission" />
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -24,12 +28,19 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.ComposeTry"
         tools:targetApi="31">
+        <activity
+            android:name=".ui.theme.MainActivity2"
+            android:exported="true"
+            android:theme="@style/Theme.ComposeTry.Main">
+
+        </activity>
+
         <service
             android:name=".TileEnabledService"
             android:enabled="true"
-            android:label="Adb Wifi"
             android:exported="true"
             android:icon="@drawable/debug"
+            android:label="Adb Wifi"
             android:permission="android.permission.BIND_QUICK_SETTINGS_TILE"
             android:roundIcon="@drawable/debug">
             <intent-filter>
@@ -46,6 +57,8 @@
 
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
                 <action android:name="com.android.server.adb.WIRELESS_DEBUG_STATUS" />
+                <action android:name="com.android.server.adb.WIRELESS_DEBUG_PAIRED_DEVICES" />
+                <action android:name="com.android.server.adb.WIRELESS_DEBUG_PAIRING_RESULT" />
             </intent-filter>
         </service>
 
@@ -70,6 +83,8 @@
 
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
                 <action android:name="com.android.server.adb.WIRELESS_DEBUG_STATUS" />
+                <action android:name="com.android.server.adb.WIRELESS_DEBUG_PAIRED_DEVICES" />
+                <action android:name="com.android.server.adb.WIRELESS_DEBUG_PAIRING_RESULT" />
             </intent-filter>
         </receiver>
     </application>

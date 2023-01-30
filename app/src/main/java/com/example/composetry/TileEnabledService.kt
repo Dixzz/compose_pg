@@ -9,7 +9,6 @@ import com.example.composetry.MyService.Companion.sendNotification
 
 @RequiresApi(Build.VERSION_CODES.N)
 class TileEnabledService : TileService() {
-
     private var isWirelessDebugEnabled: Boolean
         get() = try {
             Settings.Global.getInt(contentResolver, ADB_WIFI_ENABLED, 0) == 1

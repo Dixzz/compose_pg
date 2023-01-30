@@ -1,20 +1,30 @@
 package com.example.composetry
 
-import android.app.*
+import android.app.Notification
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
+import android.app.Service
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.content.SharedPreferences
+import android.content.pm.PackageManager
 import android.os.Build
 import android.os.IBinder
 import android.preference.PreferenceManager
 import android.provider.Settings
 import android.util.Log
+import androidx.annotation.RequiresPermission
+import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import androidx.core.content.ContextCompat
 
 const val NOTIFICATION_ID = 11
 const val NOTIFICATION_CHANNEL_ID = "com.example.composetry.NOTIFICATION_CHANNEL_ID"
-val ADB_WIFI_ENABLED = "adb_wifi_enabled"
+const val ADB_WIFI_ENABLED = "adb_wifi_enabled"
 
 private const val TAG = "MyService"
 
@@ -69,9 +79,19 @@ class MyService : Service() {
         super.onDestroy()
     }
 
+    @RequiresPermission("android.permission.MANAGE_DEBUGGING")
     override fun onCreate() {
         super.onCreate()
         mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
+        val br = object : BroadcastReceiver(){
+            override fun onReceive(context: Context?, intent: Intent?) {
+                Log.d(TAG, "onCreate: $intent")
+            }
+        }
+
+        Log.d(TAG, "onCreate: ${registerReceiver(br, IntentFilter("com.android.server.adb.WIRELESS_DEBUG_STATUS_CHANGED"))}")
+        Log.d(TAG, "onCreate: ${registerReceiver(br, IntentFilter("com.android.server.adb.WIRELESS_DEBUG_STATUS"))}")
+        Log.d(TAG, "onCreate: ${checkSelfPermission("android.permission.MANAGE_DEBUGGING") == PackageManager.PERMISSION_GRANTED}")
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -89,13 +109,13 @@ class MyService : Service() {
                 startStateNotification()
             }
             "start" -> {
-                if (mSharedPreferences.getBoolean(FORCE_STOP_SERVICE, false) || mAdbReceiver == null) {
+                if (mAdbReceiver == null || mSharedPreferences.getBoolean(FORCE_STOP_SERVICE, false)) {
                     createChannel()
                     registerForegroundService()
                     mAdbReceiver = AdbReceiver.register(this)
                     mSharedPreferences.edit().putBoolean(FORCE_STOP_SERVICE, false).apply()
                     if (isWirelessDebugEnabled) {
-                        if (!mSharedPreferences.getBoolean(AdbReceiver.IS_ADB_DIRTY_KEY, true)) {
+                        if (!mSharedPreferences.getBoolean(AdbReceiver.IS_ADB_DIRTY_KEY, false)) {
                             val ip = mSharedPreferences.getString(AdbReceiver.ADB_PORT_IP_KEY, "")
                             val port =
                                 mSharedPreferences.getInt(AdbReceiver.ADB_PORT_KEY, -1).toString()
