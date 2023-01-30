@@ -1,4 +1,4 @@
-## Templates for abcd ##
+## Templates for kotin ##
 
 .if : mockito abcd
-    ANY                 [org.mockito.Mockito]          →  org.mockito.Mockito.mock($expr$)
+    ANY                if($expr$) {} else {$expr$}
