@@ -1,0 +1,4 @@
+## Templates for abcd ##
+
+.if : mockito abcd
+    ANY                 [org.mockito.Mockito]          →  org.mockito.Mockito.mock($expr$)
