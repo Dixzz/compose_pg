@@ -1,4 +1,20 @@
-## Templates for kotin ##
+## Templates for kotlin expressions ##
 
-.if : mockito abcd
-    ANY                if($expr$) {} else {$expr$}
+.if : take if and expression
+    ANY → if ($expr$){$END$}
+
+.logit : log the expression with method name
+   ANY → logit($expr$)
+
+.logit : log current clipboard
+   ANY →  logit($first#1:clipboard()$)
+
+.test : test
+   ANY  →  "$user*#1:user()$: $second#3:className()$ + $first#2::"1st"$ + $first$" + $expr$
+
+.ifelse : take if expression, else
+    ANY → if ($expr$) {\
+      $END$\
+    } else {\
+      $END$\
+    }
